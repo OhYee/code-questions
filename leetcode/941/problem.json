@@ -1,0 +1,28 @@
+{
+    "name": "validMountainArray",
+    "samples": [
+        {
+            "in": [
+                2,
+                1
+            ],
+            "out": false
+        },
+        {
+            "in": [
+                2,
+                1
+            ],
+            "out": false
+        },
+        {
+            "in": [
+                0,
+                3,
+                2,
+                1
+            ],
+            "out": true
+        }
+    ]
+}
