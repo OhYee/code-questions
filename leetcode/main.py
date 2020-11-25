@@ -6,12 +6,14 @@ import subprocess
 
 PWD = os.path.dirname(os.path.abspath(__file__))
 
+def color(num, *args, **kwargs):
+    end = kwargs.get("end", "\n")
+    if "end" in kwargs:
+        del kwargs["end"]
+    print("\033[%sm" % (str(num)), end="")
+    print(*args, **kwargs, end="")
+    print("\033[0m", end=end)
 
-def call(*args):
-    r = os.popen(" ".join(args))
-    text = r.read()
-    r.close()
-    return text
 
 
 py3template = '''
