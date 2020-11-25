@@ -221,15 +221,50 @@ class GoRunner(CodeRunner):
         call("go", "fmt", tmpFile)
 
 
+def help():
+    print("本地代码测试，支持 Python、Go")
+    print("python main.py [题号] [%s] [-v | --verbose] [-h | --help] [-d | --debug]" % (
+        " | ".join(langMap.keys())
+    ))
+    exit(0)
 
-    res = call("python3", tmpFile)
-    print(res)
 
+langMap = {
+    "python": Python3Runner,
+    "py": Python3Runner,
+    "python3": Python3Runner,
+    "py3": Python3Runner,
+    "go": GoRunner,
+}
 
 if __name__ == "__main__":
     _id = sys.argv[1]
+    language = "python"
+    debug = False
+    verbose = False
+
+    for arg in sys.argv:
+        arg = arg.lower()
+        if re.match(r'^\d+$', arg):
+            _id = arg
+        elif arg in langMap.keys():
+            language = arg
+        elif arg in ["-d", "--debug"]:
+            debug = True
+        elif arg in ["-v", "--verbose"]:
+            verbose = True
+        elif arg in ["-h", "--help"]:
+            help()
+
     with open("./%s/problem.json" % _id) as f:
         problem = json.loads(f.read())
     name = problem["name"]
     tests = problem["samples"]
-    runPython3(_id, name, tests)
+
+    ctx = Context(_id, name, tests=tests, language=language,
+                  debug=debug, verbose=verbose)
+    if debug:
+        color(93, ctx)
+
+    runner = langMap[ctx.language]()
+    runner.run(ctx)
