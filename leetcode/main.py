@@ -59,6 +59,71 @@ def call(*args, **kwargs):
     except:
         res = outs
     return  res
+
+
+class CodeRunner():
+    def __init__(self, language, suffix, cmd, codeFormat):
+        self.language = language
+        self.suffix = suffix
+        self.cmd = cmd
+        self.codeFormat = codeFormat
+        self.PWD = os.path.dirname(os.path.abspath(__file__))
+
+    def read(self, ctx):
+        folder = "%s/%s" % (self.PWD, ctx.id)
+        source = os.path.join(folder, "%s.%s" % (ctx.id, self.suffix))
+
+        with open(source) as f:
+            code = f.read()
+        return code
+
+    def generate(self, ctx, code):
+        folder = "%s/%s" % (self.PWD, ctx.id)
+        tmpFolder = os.path.join(folder, "dist")
+        tmpFile = os.path.join(tmpFolder, "%s.%s" % (ctx.id, self.suffix))
+
+        if not os.path.exists(tmpFolder):
+            os.mkdir(tmpFolder)
+        with open(tmpFile, "w") as f:
+            f.write(self.codeFormat.format(code=code, name=ctx.name))
+
+        return tmpFile
+
+    def afterGenerate(self, ctx, tmpFile):
+        pass
+
+    def check(self, ctx, tmpFile):
+        total = len(tests)
+        passed = True
+        for idx, test in enumerate(ctx.tests):
+            if ctx.verbose:
+                color("1;34", "Test", idx+1)
+
+            out = call(self.cmd, tmpFile, input=test["in"])
+
+            if out != test["out"]:
+                passed = False
+                color("1;31", "Error at", idx + 1, "test")
+
+            if out != test["out"] or ctx.verbose:
+                color(3, "\tinput\t", end="")
+                color(0, test["in"])
+
+                color(3, "\tgot  \t", end="")
+                color(0, out)
+
+                color(3, "\twant \t", end="")
+                color(0, test["out"])
+
+        if passed:
+            color(92, "All %d testcases passed" % total)
+
+    def run(self, ctx):
+        code = self.read(ctx)
+        tmpFile = self.generate(ctx, code)
+        self.afterGenerate(ctx, tmpFile)
+        self.check(ctx, tmpFile)
+
 from typing import *
 
 {code}
