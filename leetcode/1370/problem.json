@@ -1,0 +1,25 @@
+{
+    "name": "sortString",
+    "samples": [
+        {
+            "in": "aaaabbbbcccc",
+            "out": "abccbaabccba"
+        },
+        {
+            "in": "rat",
+            "out": "art"
+        },
+        {
+            "in": "leetcode",
+            "out": "cdelotee"
+        },
+        {
+            "in": "ggggggg",
+            "out": "ggggggg"
+        },
+        {
+            "in": "spo",
+            "out": "ops"
+        }
+    ]
+}
