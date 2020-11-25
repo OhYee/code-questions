@@ -15,6 +15,21 @@ def color(num, *args, **kwargs):
     print("\033[0m", end=end)
 
 
+class Context:
+    def __init__(self, _id, name, tests=[], language="python", debug=False, verbose=False):
+        self.id = _id
+        self.language = language
+        self.debug = debug
+        self.name = name
+        self.tests = tests
+        self.verbose = verbose
+
+    def __repr__(self):
+        return "id={} name={} language={} debug={} verbose={}\n{}".format(
+            self.id, self.name, self.language,
+            self.debug, self.verbose, self.tests
+        )
+
 
 def call(*args, **kwargs):
     proc = subprocess.Popen(
