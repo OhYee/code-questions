@@ -16,7 +16,34 @@ def color(num, *args, **kwargs):
 
 
 
-py3template = '''
+def call(*args, **kwargs):
+    proc = subprocess.Popen(
+        " ".join(args),
+        shell=True,
+        stdout=subprocess.PIPE,
+        stdin=subprocess.PIPE,
+        bufsize=0
+    )
+    try:
+        outs, errs = proc.communicate(
+            timeout=15,
+            input=bytes(
+                json.dumps(kwargs["input"]),
+                encoding="utf-8",
+            ) if "input" in kwargs else None,
+        )
+        outs = str(outs, encoding="utf-8")
+    except Exception as e:
+        outs = ""
+        color(1, e)
+        color(1, errs)
+    finally:
+        proc.kill()
+    try:
+        res = json.loads(outs)["out"]
+    except:
+        res = outs
+    return  res
 from typing import *
 
 {code}
