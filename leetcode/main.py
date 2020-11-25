@@ -144,22 +144,83 @@ class Python3Runner(CodeRunner):
         super().__init__("python3", "py", "python3", py3fmt)
 
 
-    if passed:
-        print("\033[92mAll %d testcases passed\033[0m" % total)
+gofmt = '''
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"reflect"
+)
+
+{code}
+
+
+func main() {{
+	rv := reflect.ValueOf({name})
+	rt := rv.Type()
+	inputBytes, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {{
+		panic(err)
+	}}
+	var input interface{{}}
+	json.Unmarshal(inputBytes, &input)
+	iv := reflect.ValueOf(input)
+	ov := make([]reflect.Value, 0)
+    
+    if rt.NumIn() == 1 {{
+        in := reflect.New(rt.In(0)).Elem()
+		in.Set(iv)
+		ov = rv.Call([]reflect.Value{{in}})
+	}} else {{
+		ins := make([]reflect.Value, iv.Len())
+		for i := 0; i < iv.Len(); i++ {{
+			ins[i] = reflect.New(rt.In(i))
+            ins[i].Set(iv.Index(i))
+		}}
+		ov = rv.Call(ins)
+	}}
+	if rt.NumOut() == 1 {{
+		fmt.Print(json.Marshal(map[string]interface{{}}{{
+			"out": ov[0].Interface(),
+		}}))
+	}} else {{
+		out := make([]interface{{}}, rt.NumOut())
+		for idx, o := range ov {{
+			out[idx] = o.Interface()
+		}}
+		fmt.Print(json.Marshal(map[string]interface{{}}{{
+			"out": out,
+		}}))
+	}}
+}}
+
 '''
 
 
-def runPython3(_id, name, tests):
-    folder = "%s/%s" % (PWD, _id)
-    source = os.path.join(folder, "%s.py" % _id)
-    tmpFolder = os.path.join(folder, "dist")
-    tmpFile = os.path.join(tmpFolder, "%s.py" % _id)
-    with open(source) as f:
-        code = f.read()
-    if not os.path.exists(tmpFolder):
-        os.mkdir(tmpFolder)
-    with open(tmpFile, "w") as f:
-        f.write(py3template.format(code=code, name=name, tests=tests))
+class GoRunner(CodeRunner):
+    def __init__(self):
+        super().__init__("go", "go", "go run", gofmt)
+
+    def generate(self, ctx, code):
+        folder = "%s/%s" % (self.PWD, ctx.id)
+        tmpFolder = os.path.join(folder, "dist")
+        tmpFile = os.path.join(tmpFolder, "%s.%s" % (ctx.id, self.suffix))
+
+        if not os.path.exists(tmpFolder):
+            os.mkdir(tmpFolder)
+        with open(tmpFile, "w") as f:
+            f.write(self.codeFormat.format(code="\n".join(
+                code.split("\n")[1:]), name=ctx.name))
+
+        return tmpFile
+
+    def afterGenerate(self, ctx, tmpFile):
+        call("go", "fmt", tmpFile)
+
+
 
     res = call("python3", tmpFile)
     print(res)
