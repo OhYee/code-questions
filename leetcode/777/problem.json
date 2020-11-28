@@ -1,0 +1,12 @@
+{
+    "name": "canTransform",
+    "samples": [
+        {
+            "in": [
+                "RXXLRXRXL",
+                "XRLXXRRLX"
+            ],
+            "out": true
+        }
+    ]
+}
