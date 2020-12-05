@@ -1,0 +1,19 @@
+{
+    "name": "leastInterval",
+    "samples": [
+        {
+            "in": [
+                [
+                    "A",
+                    "A",
+                    "A",
+                    "B",
+                    "B",
+                    "B"
+                ],
+                2
+            ],
+            "out": 8
+        }
+    ]
+}
