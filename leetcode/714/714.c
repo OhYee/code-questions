@@ -1,5 +1,4 @@
-#define MAXN (50005)
-int dp[MAXN][2];
+#include <bits/stdc++.h>
 
 int maxProfit(int* prices, int pricesSize, int fee){
     int dp[2][2];
